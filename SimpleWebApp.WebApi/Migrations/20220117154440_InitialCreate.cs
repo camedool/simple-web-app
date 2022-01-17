@@ -76,7 +76,7 @@ namespace SimpleWebApp.WebApi.Migrations
             migrationBuilder.InsertData(
                 table: "Items",
                 columns: new[] { "Id", "Created", "Description", "Modified", "Name", "Type" },
-                values: new object[] { 1L, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "T-Short", "Clothes" });
+                values: new object[] { 1L, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "T-Shirt", "Clothes" });
 
             migrationBuilder.InsertData(
                 table: "Items",

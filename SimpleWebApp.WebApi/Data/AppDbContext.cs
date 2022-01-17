@@ -40,7 +40,7 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Item>()
             .HasData(
-                new Item { Id = 1, Name = "T-Short", Type = GoodType.Clothes },
+                new Item { Id = 1, Name = "T-Shirt", Type = GoodType.Clothes },
                 new Item { Id = 2, Name = "Mobile phone", Type = GoodType.Digital, Description = "Android phone" },
                 new Item { Id = 3, Name = "Pain killer", Type = GoodType.HealthCare },
                 new Item { Id = 4, Name = "Chocolate", Type = GoodType.Food, Description = "Dark chocolate" },

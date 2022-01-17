@@ -22,7 +22,7 @@ public sealed class InventoryService : IInventoryService
         _logger = logger;
     }
 
-    public async Task<bool> TryAddAsync(InventoryDto inventoryDto,
+    public async Task<(bool IsCreated, InventoryDto NewInventory)> AddAsync(InventoryDto inventoryDto,
         CancellationToken cancellationToken = default)
     {
         var inventory = inventoryDto.ToModel();
@@ -36,14 +36,14 @@ public sealed class InventoryService : IInventoryService
                 await _inventoryRepository.AddAsync(inventory, cancellationToken);
                 inventoryDto = inventory.ToDto();
                 
-                return true;
+                return (true, inventoryDto);
             }
 
-            return false;
+            return (false, inventoryDto);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Couldn't add inventory. Inventory details: {@inventory}", inventoryDto);
+            _logger.LogError(ex, "Couldn't add inventory. Inventory details: {@inventoryDto}", inventoryDto);
             throw;
         }
         finally
@@ -57,7 +57,6 @@ public sealed class InventoryService : IInventoryService
     {
         var inventories = await _inventoryRepository.GetAsync(cancellationToken);
         return inventories.Select(x => x.ToDto());
-
     }
 
     private async Task<bool> CanAddIntoWarehouse(long warehouseId, long newItems,
@@ -69,8 +68,48 @@ public sealed class InventoryService : IInventoryService
         return currentCapacity >= currentOccupancy + newItems;
     }
 
-    public Task<ItemDto> UpdateAsync(InventoryDto inventoryDto, CancellationToken cancellationToken = default)
+    public async Task<(bool IsUpdated, InventoryDto UpdatedInventory)> UpdateAsync(
+        InventoryDto inventoryDto, 
+        CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var inventory = inventoryDto.ToModel();
+
+        // TODO: consider implementing some sort of cache, for performance reason
+        await _semaphore.WaitAsync(cancellationToken);
+        try
+        {
+            if (await CanAddIntoWarehouse(inventory.WarehouseId, inventory.Quantity, cancellationToken))
+            {
+                await _inventoryRepository.UpdateAsync(inventory, cancellationToken);
+                inventoryDto = inventory.ToDto();
+
+                return (true, inventoryDto);
+            }
+
+            return (false, inventoryDto);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Couldn't update inventory. Inventory details: {@inventory}", inventoryDto);
+            throw;
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    public async Task<bool> DeleteAsync(long inventoryId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _inventoryRepository.DeleteAsync(inventoryId, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Couldn't delete inventory. Inventory id: {@inventoryId}", inventoryId);
+            throw;
+        }
     }
 }

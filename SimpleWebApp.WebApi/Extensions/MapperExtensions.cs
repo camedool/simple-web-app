@@ -24,9 +24,10 @@ internal static class MapperExtensions
             Id = inventory.Id,
             ItemId = inventory.ItemId,
             WarehouseId = inventory.WarehouseId,
+            WarehouseLocation = inventory.Warehouse.Location,
             Quantity = inventory.Quantity,
             Description = inventory.Description,
-            Type = inventory.Item.Type,
+            GoodType = inventory.Item.Type,
             ItemName = inventory.Item.Name
         };
     }
@@ -51,5 +52,22 @@ internal static class MapperExtensions
             Description = item.Description,
             Type = item.Type
         };
+    }
+
+    internal static Warehouse ToModel(this WarehouseDto warehouseDto)
+    {
+        return new Warehouse()
+        {
+            Id = warehouseDto.Id,
+            Name = warehouseDto.Name,
+            Location = warehouseDto.Location,
+            Capacity = warehouseDto.Capacity
+        };
+    }
+
+    internal static WarehouseDto ToDto(this Warehouse warehouse)
+    {
+        return new WarehouseDto(warehouse.Id, warehouse.Name,
+            warehouse.Location, warehouse.Capacity);
     }
 }

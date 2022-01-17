@@ -5,7 +5,7 @@ using SimpleWebApp.WebApi.Models;
 namespace SimpleWebApp.WebApi.Repositories;
 
 public class Repository<T> : IRepository<T>
-    where T : class, IDbItem
+    where T : class, IDbItem, new()
 {
     private readonly AppDbContext _context;
     private readonly DbSet<T> _dbSet;
@@ -19,8 +19,8 @@ public class Repository<T> : IRepository<T>
     public virtual async Task<T> AddAsync(T item, CancellationToken cancellationToken = default)
     {
         item.Created = DateTime.UtcNow;
-        item.Modified = DateTime.UtcNow;  
-        
+        item.Modified = DateTime.UtcNow;
+
         await _dbSet.AddAsync(item, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
@@ -37,11 +37,13 @@ public class Repository<T> : IRepository<T>
         return item;
     }
 
-    public virtual async Task<bool> DeleteAsync(T item, CancellationToken cancellationToken = default)
+    public virtual async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default)
     {
+        T item = new() { Id = id };
+
         _dbSet.Remove(item);
         var numberOfSaved = await _context.SaveChangesAsync(cancellationToken);
-        return numberOfSaved == 0;
+        return numberOfSaved == 1;
     }
 
     public virtual async Task<T?> GetAsync(long id, CancellationToken cancellationToken = default)
@@ -51,7 +53,9 @@ public class Repository<T> : IRepository<T>
 
     public virtual async Task<IReadOnlyCollection<T>> GetAsync(CancellationToken cancellationToken = default)
     {
-        var items = await _dbSet.ToListAsync(cancellationToken);
+        var items = await _dbSet.AsNoTracking()
+            .ToListAsync(cancellationToken);
+
         return items.AsReadOnly();
     }
 }

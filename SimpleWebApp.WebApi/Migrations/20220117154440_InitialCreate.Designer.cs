@@ -11,7 +11,7 @@ using SimpleWebApp.WebApi.Data;
 namespace SimpleWebApp.WebApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20220116210059_InitialCreate")]
+    [Migration("20220117154440_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -117,7 +117,7 @@ namespace SimpleWebApp.WebApi.Migrations
                             Id = 1L,
                             Created = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Modified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "T-Short",
+                            Name = "T-Shirt",
                             Type = "Clothes"
                         },
                         new

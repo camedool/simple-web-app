@@ -6,8 +6,11 @@ public interface IInventoryService
 {
     Task<IEnumerable<InventoryDto>> GetAsync(
         CancellationToken cancellationToken = default);
-    Task<bool> TryAddAsync(InventoryDto inventoryDto,
+    Task<(bool IsCreated, InventoryDto NewInventory)> AddAsync(InventoryDto inventoryDto,
         CancellationToken cancellationToken = default);
-    Task<ItemDto> UpdateAsync(InventoryDto inventoryDto,
+    Task<(bool IsUpdated, InventoryDto UpdatedInventory)> UpdateAsync(InventoryDto inventoryDto,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> DeleteAsync(long inventoryId,
         CancellationToken cancellationToken = default);
 }

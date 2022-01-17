@@ -8,7 +8,7 @@ namespace SimpleWebApp.WebApi.Repositories;
 /// </summary>
 /// <typeparam name="T"></typeparam>
 public interface IRepository<T>
-    where T : class, IDbItem
+    where T : class, IDbItem, new()
 {
     Task<T?> GetAsync(long id, 
         CancellationToken cancellationToken = default);
@@ -18,5 +18,5 @@ public interface IRepository<T>
 
     Task<T> AddAsync(T item, CancellationToken cancellationToken = default);
     Task<T> UpdateAsync(T item, CancellationToken cancellationToken = default);
-    Task<bool> DeleteAsync(T item, CancellationToken cancellationToken = default);
+    Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default);
 }

@@ -24,9 +24,37 @@ public sealed class InventoryRepository : Repository<Inventory>, IInventoryRepos
         CancellationToken cancellationToken = default)
     {
         var items = await _context.Inventories
+            .AsNoTracking()
             .Include(x => x.Item)
+            .Include(x => x.Warehouse)
             .ToListAsync(cancellationToken);
         
         return items.AsReadOnly();
+    }
+
+    public override async Task<Inventory> AddAsync(Inventory item,
+        CancellationToken cancellationToken = default)
+    {
+        await base.AddAsync(item, cancellationToken);
+        IncludeNavProperties(item);
+
+        return item;
+    }
+
+    public override async Task<Inventory> UpdateAsync(Inventory item,
+    CancellationToken cancellationToken = default)
+    {
+        await base.UpdateAsync(item, cancellationToken);
+        IncludeNavProperties(item);
+
+        return item;
+    }
+
+    private void IncludeNavProperties(Inventory item)
+    {
+        _context.Inventories
+            .Include(x => x.Item)
+            .Include(x => x.Warehouse)
+            .SingleOrDefault(x => x.Id == item.Id);
     }
 }
