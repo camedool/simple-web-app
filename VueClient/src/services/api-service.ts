@@ -23,11 +23,7 @@ export default class ApiService {
       const response = await this._instance.get("/inventories");
       return response.data.map((x) => new InventoryDto().deserialize(x));
     } catch (error: any) {
-      if (error?.response) {
-        throw new Error(error?.response?.data);
-      } else {
-        throw new Error(error);
-      }
+      this.handleError(error);
     }
   }
 
@@ -36,11 +32,7 @@ export default class ApiService {
       const response = await this._instance.get("/items");
       return response.data.map((x) => new ItemDto().deserialize(x));
     } catch (error: any) {
-      if (error?.response) {
-        throw new Error(error?.response?.data);
-      } else {
-        throw new Error(error);
-      }
+      this.handleError(error);
     }
   }
 
@@ -51,11 +43,7 @@ export default class ApiService {
       const response = await this._instance.get("/warehouses");
       return response.data;
     } catch (error: any) {
-      if (error?.response) {
-        throw new Error(error?.response?.data);
-      } else {
-        throw new Error(error);
-      }
+      this.handleError(error);
     }
   }
 
@@ -69,11 +57,7 @@ export default class ApiService {
       );
       return new InventoryDto().deserialize(response.data);
     } catch (error: any) {
-      if (error?.response) {
-        throw new Error(error?.response?.data?.title);
-      } else {
-        throw new Error(error);
-      }
+      this.handleError(error);
     }
   }
 
@@ -84,11 +68,7 @@ export default class ApiService {
       const response = await this._instance.post("/inventories", inventory);
       return new InventoryDto().deserialize(response.data);
     } catch (error: any) {
-      if (error?.response) {
-        throw new Error(error?.response?.data?.title);
-      } else {
-        throw new Error(error);
-      }
+      this.handleError(error);
     }
   }
 
@@ -96,11 +76,7 @@ export default class ApiService {
     try {
       await this._instance.delete(`/inventories/${inventoryId}`);
     } catch (error: any) {
-      if (error?.response) {
-        throw new Error(error?.response?.data?.title);
-      } else {
-        throw new Error(error);
-      }
+      this.handleError(error);
     }
   }
 
@@ -109,11 +85,7 @@ export default class ApiService {
       const response = await this._instance.put(`/items/${item.id}`, item);
       return new ItemDto().deserialize(response.data);
     } catch (error: any) {
-      if (error?.response) {
-        throw new Error(error?.response?.data?.title);
-      } else {
-        throw new Error(error);
-      }
+      this.handleError(error);
     }
   }
 
@@ -122,11 +94,7 @@ export default class ApiService {
       const response = await this._instance.post("/items", item);
       return new ItemDto().deserialize(response.data);
     } catch (error: any) {
-      if (error?.response) {
-        throw new Error(error?.response?.data?.title);
-      } else {
-        throw new Error(error);
-      }
+      this.handleError(error);
     }
   }
 
@@ -134,8 +102,16 @@ export default class ApiService {
     try {
       await this._instance.delete(`/items/${itemId}`);
     } catch (error: any) {
-      if (error?.response) {
+      this.handleError(error);
+    }
+  }
+
+  private static handleError(error: any): any {
+    if (error?.response) {
+      if (error?.response?.data?.title) {
         throw new Error(error?.response?.data?.title);
+      } else if (error?.response?.data) {
+        throw new Error(error?.response?.data);
       } else {
         throw new Error(error);
       }
