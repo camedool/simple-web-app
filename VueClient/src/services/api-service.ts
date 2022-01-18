@@ -70,7 +70,7 @@ export default class ApiService {
       return new InventoryDto().deserialize(response.data);
     } catch (error: any) {
       if (error?.response) {
-        throw new Error(error?.response?.data);
+        throw new Error(error?.response?.data?.title);
       } else {
         throw new Error(error);
       }
@@ -85,7 +85,7 @@ export default class ApiService {
       return new InventoryDto().deserialize(response.data);
     } catch (error: any) {
       if (error?.response) {
-        throw new Error(error?.response?.data);
+        throw new Error(error?.response?.data?.title);
       } else {
         throw new Error(error);
       }
@@ -97,7 +97,7 @@ export default class ApiService {
       await this._instance.delete(`/inventories/${inventoryId}`);
     } catch (error: any) {
       if (error?.response) {
-        throw new Error(error?.response?.data);
+        throw new Error(error?.response?.data?.title);
       } else {
         throw new Error(error);
       }
