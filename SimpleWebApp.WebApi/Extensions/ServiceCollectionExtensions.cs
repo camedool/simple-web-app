@@ -24,7 +24,7 @@ internal static class ServiceCollectionExtensions
         var connectionString = GetSqliteConnectionString(configuration);
 
         serviceCollection.AddDbContext<AppDbContext>(
-            opt => opt.UseSqlite(Path.Combine(connectionString)));
+            opt => opt.UseSqlite(connectionString));
 
         return serviceCollection;
     }
@@ -57,23 +57,12 @@ internal static class ServiceCollectionExtensions
         var fileName = configuration
             .GetSection(SqliteSetting.AppSettingsPath).Get<SqliteSetting>().FileName;
         
-        var path = Path.Combine(DbRelativeDirectory, fileName);
-        EnsureDbFileExits(path);
-
-        return $"Data Source={Path.Combine(DbRelativeDirectory, fileName)}";
-    }
-
-    private static void EnsureDbFileExits(string path)
-    {   // make sure directory exists
+        // make sure directory exists
         if (!Directory.Exists(DbRelativeDirectory))
         {
             Directory.CreateDirectory(DbRelativeDirectory);
         }
 
-        // make sure file exists
-        if (!File.Exists(path))
-        {
-            File.Create(path);
-        }
+        return $"Data Source={Path.Combine(DbRelativeDirectory, fileName)}";
     }
 }
