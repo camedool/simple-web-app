@@ -32,4 +32,9 @@ public sealed class ItemService : IItemService
         await _itemRepository.UpdateAsync(item, cancellationToken);
         return item.ToDto();
     }
+
+    public Task<bool> DeleteAsync(long itemId, CancellationToken cancellationToken = default)
+    {
+        return _itemRepository.DeleteAsync(itemId, cancellationToken);
+    }
 }

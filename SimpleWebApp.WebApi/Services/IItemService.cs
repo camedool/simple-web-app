@@ -10,4 +10,6 @@ public interface IItemService
         CancellationToken cancellationToken = default);
     Task<ItemDto> UpdateAsync(ItemDto itemDto,
         CancellationToken cancellationToken = default);
+    Task<bool> DeleteAsync(long itemId, 
+        CancellationToken cancellationToken = default);
 }
