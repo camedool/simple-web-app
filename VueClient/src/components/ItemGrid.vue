@@ -1,27 +1,20 @@
 <template>
   <v-data-table
     :headers="headers"
-    :items="inventories"
+    :items="items"
     class="elevation-1"
     :loading="isLoading"
     loading-text="Loading... Please wait"
   >
     <template v-slot:top>
       <v-toolbar flat>
-        <v-toolbar-title>Current inventories in all warehouses</v-toolbar-title>
+        <v-toolbar-title>Current existing items</v-toolbar-title>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
         <v-dialog v-model="dialog" persistent max-width="700px">
           <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              color="primary"
-              dark
-              class="mb-2"
-              v-bind="attrs"
-              v-on="on"
-              @click="onNew"
-            >
-              <v-icon right dark class="mr-2"> mdi-cart-plus </v-icon>
+            <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
+              <v-icon right dark class="mr-2"> mdi-briefcase-plus </v-icon>
               New
             </v-btn>
           </template>
@@ -34,34 +27,23 @@
               <v-card-text>
                 <v-container>
                   <v-row>
-                    <v-col cols="12" sm="8" md="5">
-                      <v-select
-                        :items="items"
-                        v-model="editedItem.itemId"
-                        item-value="id"
-                        item-text="name"
-                        label="Item"
-                        :rules="[requiredSelect]"
-                      ></v-select>
-                    </v-col>
-                    <v-col cols="8" sm="7" md="5">
-                      <v-select
-                        :items="warehouses"
-                        v-model="editedItem.warehouseId"
-                        item-value="id"
-                        item-text="location"
-                        label="Warehouse"
-                        :rules="[requiredSelect]"
-                      ></v-select>
-                    </v-col>
-                    <v-col cols="6" sm="2" md="2">
+                    <v-col cols="12" sm="10" md="6">
                       <v-text-field
-                        v-model="editedItem.quantity"
-                        :rules="[positiveInteger]"
-                        label="Quantity"
-                        type="number"
-                        :min="1"
+                        :items="items"
+                        v-model="editedItem.name"
+                        label="Name"
+                        :rules="[required]"
                       ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="10" md="6">
+                      <v-select
+                        :items="goodTypes"
+                        v-model="editedItem.type"
+                        item-value="type"
+                        item-text="name"
+                        label="Type"
+                        :rules="[requiredSelect]"
+                      ></v-select>
                     </v-col>
                     <v-col class="mt-1" cols="12" sm="12" md="12">
                       <v-text-field
@@ -112,8 +94,8 @@
       <v-icon small class="mr-2" @click="editItem(item)"> mdi-pencil </v-icon>
       <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
     </template>
-    <template v-slot:item.goodType="{ item }">
-      <v-chip text-color="white" :color="getColor(item.goodType)">
+    <template v-slot:item.type="{ item }">
+      <v-chip text-color="white" :color="getColor(item.type)">
         {{ item.goodTypeString }}
       </v-chip>
     </template>
@@ -121,37 +103,43 @@
 </template>
 <script lang="ts">
 import ApiService from "@/services/api-service";
-import InventoryDto from "@/models/inventory-dto";
 import ItemDto from "@/models/item-dto";
-import WarehouseDto from "@/models/warehouse-dto";
 import { getColor } from "@/helpers/common";
 import { GoodType } from "@/models/good-type";
 import validators from "@/helpers/validationHelper";
 
 export default {
-  name: "InventoryGrid",
+  name: "ItemGrid",
   data: () => ({
     dialog: false,
     dialogDelete: false,
     isLoading: false,
     headers: [
-      { text: "Name", align: "start", value: "itemName" },
-      { text: "Good type", value: "goodType" },
-      { text: "Warehouse", value: "warehouseLocation" },
-      { text: "Quantity", value: "quantity" },
+      { text: "Name", align: "start", value: "name" },
+      { text: "Good type", value: "type" },
       { text: "Description", value: "description", sortable: false },
       { text: "Actions", value: "actions", sortable: false },
     ],
-    inventories: [] as InventoryDto[],
     items: [] as ItemDto[],
-    warehouses: [] as WarehouseDto[],
     editedIndex: -1,
-    editedItem: new InventoryDto(),
-    defaultItem: new InventoryDto(),
+    editedItem: new ItemDto(),
+    defaultItem: new ItemDto(),
   }),
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "New Inventory" : "Edit Inventory";
+      return this.editedIndex === -1 ? "New Item" : "Edit Item";
+    },
+    goodTypes(): any[] {
+      const types = [];
+      Object.keys(GoodType).forEach((key) => {
+        if (!Number.isNaN(Number(key))) {
+          types.push({
+            type: Number(key),
+            name: GoodType[key],
+          });
+        }
+      });
+      return types;
     },
   },
 
@@ -167,11 +155,7 @@ export default {
   async created() {
     try {
       this.isLoading = true;
-      this.inventories = (await ApiService.getInventories()) || [];
-      const warehouses = (await ApiService.getWarehouses()) || [];
-      this.warehouses = warehouses.sort((x, y) =>
-        x.location.localeCompare(y.location)
-      );
+      this.items = (await ApiService.getItems()) || [];
     } catch (error) {
       this.$toast.error(error.message);
     } finally {
@@ -184,29 +168,14 @@ export default {
     getColor(goodType: GoodType): string {
       return getColor(goodType);
     },
-    async editItem(item: InventoryDto) {
-      await this.loadItems();
-      this.editedIndex = this.inventories.indexOf(item);
+    async editItem(item: ItemDto) {
+      this.editedIndex = this.items.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
-    async loadItems() {
-      try {
-        const items = (await ApiService.getItems()) || [];
-        this.items = items.sort((x, y) => x.name.localeCompare(y.name));
-      } catch (error) {
-        this.$toast.error(error.message);
-      }
-    },
-    async onNew() {
-      await this.loadItems();
-      this.editedIndex = -1;
-      this.editedItem = Object.assign({}, this.defaultItem);
-      this.dialog = true;
-    },
 
-    deleteItem(item: InventoryDto) {
-      this.editedIndex = this.inventories.indexOf(item);
+    deleteItem(item: ItemDto) {
+      this.editedIndex = this.items.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialogDelete = true;
     },
@@ -214,10 +183,10 @@ export default {
     async deleteItemConfirm() {
       try {
         this.isLoading = true;
-        await ApiService.deleteInventory(this.editedItem.id);
-        this.inventories.splice(this.editedIndex, 1);
+        await ApiService.deleteItem(this.editedItem.id);
+        this.items.splice(this.editedIndex, 1);
         this.closeDelete();
-        this.$toast.success("Inventory deleted successfully");
+        this.$toast.success("Item deleted successfully");
       } catch (error) {
         this.$toast.error(error.message);
       } finally {
@@ -246,48 +215,36 @@ export default {
         return;
       }
 
-      this.updateEditedItem();
       if (this.editedIndex > -1) {
-        await this.saveInventory();
+        await this.saveItem();
       } else {
-        await this.createInventory();
+        await this.createItem();
       }
       this.close();
     },
-    async saveInventory() {
+    async saveItem() {
       try {
         this.isLoading = true;
-        const inventory = await ApiService.saveInventory(this.editedItem);
-        this.inventories.splice(this.editedIndex, 1, inventory);
-        this.$toast.success("Inventory saved successfully");
+        const item = await ApiService.saveItem(this.editedItem);
+        this.items.splice(this.editedIndex, 1, item);
+        this.$toast.success("Item saved successfully");
       } catch (error) {
         this.$toast.error(error.message);
       } finally {
         this.isLoading = false;
       }
     },
-    async createInventory() {
+    async createItem() {
       try {
         this.isLoading = true;
-        const inventory = await ApiService.createInventory(this.editedItem);
-        this.inventories.push(inventory);
-        this.$toast.success("Inventory created successfully");
+        const item = await ApiService.createItem(this.editedItem);
+        this.items.push(item);
+        this.$toast.success("Item created successfully");
       } catch (error) {
         this.$toast.error(error.message);
       } finally {
         this.isLoading = false;
       }
-    },
-    updateEditedItem() {
-      const item = this.items.find((x) => x.id === this.editedItem.itemId);
-      const warehouse = this.warehouses.find(
-        (x) => x.id === this.editedItem.warehouseId
-      );
-
-      this.editedItem.itemName = item.name;
-      this.editedItem.goodType = item.type;
-      this.editedItem.goodTypeString = item.goodTypeString;
-      this.editedItem.warehouseLocation = warehouse.location;
     },
   },
 };

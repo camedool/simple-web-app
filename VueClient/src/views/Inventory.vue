@@ -35,7 +35,7 @@
                 </v-tab-item>
 
                 <v-tab-item>
-                    // TODO: add here items
+                  <item-grid />
                 </v-tab-item>
               </v-tabs-items>
             </v-card-text>
@@ -55,6 +55,7 @@
 <script lang="ts">
 import Vue from "vue";
 import InventoryGrid from "@/components/InventoryGrid.vue";
+import ItemGrid from "@/components/ItemGrid.vue";
 
 export default Vue.extend({
   data() {
@@ -63,6 +64,6 @@ export default Vue.extend({
       isLoading: false,
     };
   },
-  components: { InventoryGrid },
+  components: { InventoryGrid, ItemGrid },
 });
 </script>

@@ -9,14 +9,14 @@ export function requiredSelect(value: any): boolean | string {
   return Number(value) > -1 || "Required";
 }
 
-export function require(value: any): boolean | string {
+export function required(value: any): boolean | string {
   return (value !== undefined && value !== null && value !== "") || "Required";
 }
 
 const validationRules = {
   positiveInteger,
   requiredSelect,
-  require,
+  required,
 };
 
 export default validationRules;

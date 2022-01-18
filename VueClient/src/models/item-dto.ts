@@ -16,7 +16,7 @@ export default class ItemDto {
     this.id = id || 0;
     this.name = name || "";
     this.description = description || "";
-    this.type = type || GoodType.General;
+    this.type = type || -1;
   }
 
   deserialize(item: ItemDto): ItemDto {

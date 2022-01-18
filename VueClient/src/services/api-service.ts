@@ -103,4 +103,42 @@ export default class ApiService {
       }
     }
   }
+
+  public static async saveItem(item: ItemDto): Promise<ItemDto | undefined> {
+    try {
+      const response = await this._instance.put(`/items/${item.id}`, item);
+      return new ItemDto().deserialize(response.data);
+    } catch (error: any) {
+      if (error?.response) {
+        throw new Error(error?.response?.data?.title);
+      } else {
+        throw new Error(error);
+      }
+    }
+  }
+
+  public static async createItem(item: ItemDto): Promise<ItemDto | undefined> {
+    try {
+      const response = await this._instance.post("/items", item);
+      return new ItemDto().deserialize(response.data);
+    } catch (error: any) {
+      if (error?.response) {
+        throw new Error(error?.response?.data?.title);
+      } else {
+        throw new Error(error);
+      }
+    }
+  }
+
+  public static async deleteItem(itemId: number): Promise<void> {
+    try {
+      await this._instance.delete(`/items/${itemId}`);
+    } catch (error: any) {
+      if (error?.response) {
+        throw new Error(error?.response?.data?.title);
+      } else {
+        throw new Error(error);
+      }
+    }
+  }
 }
